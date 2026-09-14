@@ -31,7 +31,7 @@ function portadaGrande(url?: string): string | null {
     .replace("zoom=1", "zoom=2");
 }
 
-/** Busca libros en Google Books. No necesita clave de API. */
+/** Busca libros vía nuestro endpoint (cachea y evita pegarle directo a Google desde el navegador). */
 export async function buscarLibros(
   consulta: string,
   signal?: AbortSignal,
@@ -39,11 +39,11 @@ export async function buscarLibros(
   const texto = consulta.trim();
   if (texto.length < 3) return [];
 
-  const url =
-    "https://www.googleapis.com/books/v1/volumes?maxResults=12&printType=books&q=" +
-    encodeURIComponent(texto);
+  const respuesta = await fetch(`/api/books/search?q=${encodeURIComponent(texto)}`, { signal });
 
-  const respuesta = await fetch(url, { signal });
+  if (respuesta.status === 429) {
+    throw new Error("Demasiadas búsquedas seguidas. Esperá unos segundos e intentá de nuevo.");
+  }
   if (!respuesta.ok) throw new Error("No se pudo buscar en Google Books");
 
   const datos = (await respuesta.json()) as { items?: Volumen[] };

@@ -29,6 +29,7 @@ export default function FichaLibro({
   const [consulta, setConsulta] = useState("");
   const [sugerencias, setSugerencias] = useState<Sugerencia[]>([]);
   const [buscando, setBuscando] = useState(false);
+  const [errorBusqueda, setErrorBusqueda] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generoNuevo, setGeneroNuevo] = useState("");
@@ -56,14 +57,22 @@ export default function FichaLibro({
     if (texto.length < 3) {
       setSugerencias([]);
       setBuscando(false);
+      setErrorBusqueda(null);
       return;
     }
     const control = new AbortController();
     setBuscando(true);
     const tiempo = setTimeout(() => {
       buscarLibros(texto, control.signal)
-        .then((r) => setSugerencias(r))
-        .catch(() => undefined)
+        .then((r) => {
+          setSugerencias(r);
+          setErrorBusqueda(null);
+        })
+        .catch((e) => {
+          if (e instanceof DOMException && e.name === "AbortError") return;
+          setSugerencias([]);
+          setErrorBusqueda(e instanceof Error ? e.message : "No se pudo buscar.");
+        })
         .finally(() => setBuscando(false));
     }, 350);
     return () => {
@@ -158,6 +167,9 @@ export default function FichaLibro({
                 autoComplete="off"
               />
               {buscando && <p className="mt-2 text-xs text-humo">Buscando…</p>}
+              {!buscando && errorBusqueda && (
+                <p className="mt-2 text-xs text-red-600">{errorBusqueda}</p>
+              )}
               {sugerencias.length > 0 && (
                 <ul className="mt-2 divide-y divide-borde overflow-hidden rounded-lg border border-borde bg-papel">
                   {sugerencias.map((s) => (

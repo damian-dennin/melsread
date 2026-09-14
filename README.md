@@ -4,7 +4,8 @@ App personal para llevar registro de libros leídos, en curso y pendientes: punt
 estrellas, notas propias, géneros, fechas de lectura, vista por autor y números del año.
 
 Next.js 15 (App Router) + TypeScript + Tailwind + Supabase. Las portadas y los datos del libro se
-completan solos buscando en Google Books (no hace falta clave de API).
+completan solos buscando en Google Books (no hace falta clave de API, aunque conviene una para no
+toparse con el límite de búsquedas — ver el paso 2).
 
 ---
 
@@ -36,6 +37,18 @@ npm run dev
 
 Abrí http://localhost:3000, creá la cuenta y cargá un libro.
 
+### Si la búsqueda de libros tira "Too Many Requests" (429)
+
+Google Books sin clave usa una cuota anónima baja y compartida por IP, así que se agota rápido
+(sobre todo en redes compartidas o en desarrollo). La app ya cachea cada búsqueda una hora para
+pedir menos, pero la solución de fondo es sacar una clave gratis:
+
+1. [console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) →
+   creá un proyecto (o usá uno existente) → **Create Credentials → API key**.
+2. Habilitá la **Books API** para ese proyecto (**APIs & Services → Library**).
+3. Pegá la clave en `.env.local` como `GOOGLE_BOOKS_API_KEY` (sin `NEXT_PUBLIC_`: solo se usa
+   desde el servidor, nunca llega al navegador). En Vercel, cargala en **Environment Variables**.
+
 ## 3. Subirlo a Vercel
 
 1. Subí la carpeta a un repo de GitHub.
@@ -66,6 +79,7 @@ src/app/page.tsx             pantalla principal: sesión, filtros y las tres vis
 src/components/Acceso.tsx    ingreso y alta de cuenta
 src/components/FichaLibro.tsx panel para agregar y editar
 src/components/Numeros.tsx   estadísticas del año
+src/app/api/books/search     proxy a Google Books (cachea y suma la API key si hay)
 src/lib/googleBooks.ts       búsqueda de títulos y portadas
 src/lib/supabase.ts          cliente de la base
 supabase/schema.sql          tabla y políticas de seguridad
