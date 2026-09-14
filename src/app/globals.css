@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #f3f2f7;
+  color: #241f3a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Foco visible y consistente en toda la app */
+:focus-visible {
+  outline: 2px solid #5b4bc4;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* El fondo de la ficha de detalle no debe scrollear detrás del panel */
+body.panel-abierto {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes subir {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.panel-entra {
+  animation: subir 0.22s ease-out;
+}
+
+/* Scrollbar discreta en el panel lateral */
+.scroll-fino::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-fino::-webkit-scrollbar-thumb {
+  background: #dcd8e8;
+  border-radius: 999px;
+}
